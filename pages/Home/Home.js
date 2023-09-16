@@ -1,8 +1,9 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import { Accelerometer, Magnetometer } from "expo-sensors";
 import { useEffect, useState } from "react";
+import Map from "../../assets/map.png";
 
 export default function Home() {
   const THRESHOLD = 0.5;
@@ -90,7 +91,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Text>Accelerometer: (in Gs where 1 G = 9.81 m s^-2)</Text>
+      {/* <Text>Accelerometer: (in Gs where 1 G = 9.81 m s^-2)</Text>
       <Text>X: {data.x}</Text>
       <Text>Y: {data.y}</Text>
       <Text>Z: {data.z}</Text>
@@ -99,7 +100,8 @@ export default function Home() {
       <Text>Directions</Text>
       <Text>Azimuth: {orientation.azimuth}</Text>
       <Text>Pitch: {orientation.direction}</Text>
-      <StatusBar style="auto" />
+      <StatusBar style="auto" /> */}
+      <Image style={styles.image} source={Map} />
     </View>
   );
 }
@@ -110,5 +112,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  image: {
+    width: 500,
+    height: 400,
   },
 });
