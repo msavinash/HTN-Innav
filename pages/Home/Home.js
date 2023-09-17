@@ -4,11 +4,13 @@ import { StyleSheet, Text, View, Image } from "react-native";
 import { Accelerometer, Magnetometer } from "expo-sensors";
 import { useEffect, useState } from "react";
 import Map from "../../assets/map.png";
+import DotIcon from "../../assets/arrow.png";
 
 export default function Home() {
   const THRESHOLD = 0.5;
   const FIXED_CORRECTION = 4;
 
+  const [dotPosition, setDotPosition] = useState({ top: 400, left: 250 });
   const [data, setData] = useState({});
   const [currentTilt, setCurrentTilt] = useState(0);
   const [distanceTraveled, setDistanceTraveled] = useState(0);
@@ -82,12 +84,26 @@ export default function Home() {
       setDistanceTraveled(distanceTraveled + distance);
 
       setCurrentAcc(data.y);
+      calculateNewPosition();
     }
   };
 
   useEffect(() => {
     calculateDistance();
   }, [data]);
+
+  const calculateNewPosition = () => {
+    const pixelsPerFoot = 1; // Adjust based on the scale of your map
+    const angle = orientation.azimuth;
+
+    // const deltaX = distanceTraveled * Math.cos(angle) * pixelsPerFoot;
+    const deltaY = distanceTraveled * pixelsPerFoot;
+
+    setDotPosition({
+      top: dotPosition.top - deltaY,
+      // left: dotPosition.left + deltaX,
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -102,6 +118,17 @@ export default function Home() {
       <Text>Pitch: {orientation.direction}</Text>
       <StatusBar style="auto" /> */}
       <Image style={styles.image} source={Map} />
+      <Image
+        style={[
+          styles.dot,
+          {
+            top: dotPosition.top,
+            left: dotPosition.left,
+            transform: [{ rotate: `${orientation.azimuth}deg` }],
+          },
+        ]}
+        source={DotIcon}
+      />
     </View>
   );
 }
@@ -113,8 +140,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  image: {
-    width: 500,
-    height: 400,
+  image: {},
+  dot: {
+    position: "absolute",
+    width: 30,
+    height: 30,
   },
 });
