@@ -58,20 +58,27 @@ export default function Home() {
     setPath(path);
   };
 
+  const cellWidth = 60.91;
+  const cellHeight = 70.2;
+
   const renderPath = () => {
     // console.log(path);
     return (
-      <Svg height="300" width="500" style={{ position: "absolute" }}>
+      <Svg
+        height="702"
+        width="1340"
+        style={{ position: "absolute", top: 0, left: 0 }}
+      >
         {path.map((point, index) => {
           if (index < path.length - 1) {
             const nextPoint = path[index + 1];
             return (
               <Line
                 key={index}
-                x1={point[0] * 10} // Adjust the multiplication factor to match your grid size
-                y1={point[1] * 10}
-                x2={nextPoint[0] * 10}
-                y2={nextPoint[1] * 10}
+                x1={point[0] * cellWidth}
+                y1={point[1] * cellHeight}
+                x2={nextPoint[0] * cellWidth}
+                y2={nextPoint[1] * cellHeight}
                 stroke="red"
                 strokeWidth="100px"
               />
@@ -241,7 +248,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  image: {},
+  image: {
+    height: 702,
+    width: 1340,
+    // resizeMode: "contain",
+  },
   dot: {
     position: "absolute",
     width: 20,
