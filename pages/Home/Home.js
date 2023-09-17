@@ -3,8 +3,10 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { Accelerometer, Magnetometer, Gyroscope } from "expo-sensors";
 import { useEffect, useState } from "react";
-import Map from "../../assets/map.png";
+import Map from "../../assets/focus.png";
 import DotIcon from "../../assets/arrow.png";
+import { AStarFinder, Grid } from "pathfinding";
+import Svg, { Line, Circle } from "react-native-svg";
 
 export default function Home() {
   const THRESHOLD = 0.5;
@@ -22,10 +24,77 @@ export default function Home() {
   });
   const [turnDirection, setTurnDirection] = useState("");
   const [currentX, setCurrentX] = useState("");
+  const [path, setPath] = useState([]);
+  const finder = new AStarFinder();
+  const mapGrid = [
+    // Your map grid here, for example:
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+  ];
 
   useEffect(() => {
     subscribe();
   }, []);
+
+  useEffect(() => {
+    const start = { x: 9, y: 2 };
+    const end = { x: 7, y: 7 };
+
+    calculatePathToRoom(start, end);
+  }, []);
+
+  const calculatePathToRoom = (start, end) => {
+    const grid = new Grid(mapGrid);
+    const path = finder.findPath(start.x, start.y, end.x, end.y, grid);
+
+    setPath(path);
+  };
+
+  const renderPath = () => {
+    // console.log(path);
+    return (
+      <Svg height="300" width="500" style={{ position: "absolute" }}>
+        {path.map((point, index) => {
+          if (index < path.length - 1) {
+            const nextPoint = path[index + 1];
+            return (
+              <Line
+                key={index}
+                x1={point[0] * 10} // Adjust the multiplication factor to match your grid size
+                y1={point[1] * 10}
+                x2={nextPoint[0] * 10}
+                y2={nextPoint[1] * 10}
+                stroke="red"
+                strokeWidth="100px"
+              />
+            );
+          }
+          return null;
+        })}
+        {/* Optionally, mark the start and end points */}
+        {/* <Circle
+          cx={path[0][0] * 100}
+          cy={path[0][1] * 100}
+          r="5"
+          fill="green"
+        />
+        <Circle
+          cx={path[path.length - 1][0] * 100}
+          cy={path[path.length - 1][1] * 100}
+          r="5"
+          fill="blue"
+        /> */}
+      </Svg>
+    );
+  };
 
   const subscribe = () => {
     const subscription = Accelerometer.addListener((accelerometerData) => {
@@ -148,7 +217,7 @@ export default function Home() {
       <Text>Pitch: {orientation.direction}</Text>
       <Text>Turn Direction: {turnDirection}</Text>
       <StatusBar style="auto" /> */}
-      <Image style={styles.image} source={Map} />
+      <Image style={styles.image} source={Map} resizeMode="center" />
       <Image
         style={[
           styles.dot,
@@ -160,6 +229,7 @@ export default function Home() {
         ]}
         source={DotIcon}
       />
+      {renderPath()}
     </View>
   );
 }
@@ -174,7 +244,7 @@ const styles = StyleSheet.create({
   image: {},
   dot: {
     position: "absolute",
-    width: 30,
-    height: 30,
+    width: 20,
+    height: 20,
   },
 });
