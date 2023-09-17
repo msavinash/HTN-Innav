@@ -1,12 +1,13 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, Button } from "react-native";
 import { Accelerometer, Magnetometer, Gyroscope } from "expo-sensors";
 import { useEffect, useState } from "react";
 import Map from "../../assets/focus.png";
 import DotIcon from "../../assets/arrow.png";
 import { AStarFinder, Grid } from "pathfinding";
 import Svg, { Line, Circle } from "react-native-svg";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Home() {
   const THRESHOLD = 0.5;
@@ -39,6 +40,7 @@ export default function Home() {
     [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
   ];
+  const navigation = useNavigation();
 
   useEffect(() => {
     subscribe();
@@ -211,6 +213,10 @@ export default function Home() {
     });
   };
 
+  const handleScanSurroundingLtn = (e) => {
+    navigation.navigate("Scan");
+  };
+
   return (
     <View style={styles.container}>
       {/* <Text>Accelerometer: (in Gs where 1 G = 9.81 m s^-2)</Text>
@@ -238,6 +244,8 @@ export default function Home() {
         source={DotIcon}
       />
       {renderPath()}
+
+      <Button title="Scan Surrounding" onPress={handleScanSurroundingLtn} />
     </View>
   );
 }
