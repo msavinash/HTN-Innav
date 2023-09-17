@@ -224,6 +224,7 @@ export default function Home() {
       <Text>Pitch: {orientation.direction}</Text>
       <Text>Turn Direction: {turnDirection}</Text>
       <StatusBar style="auto" /> */}
+
       <Image style={styles.image} source={Map} resizeMode="center" />
       <Image
         style={[
