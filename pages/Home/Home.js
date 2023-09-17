@@ -39,7 +39,6 @@ export default function Home() {
     [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
   ];
-
   useEffect(() => {
     subscribe();
   }, []);
@@ -58,49 +57,37 @@ export default function Home() {
     setPath(path);
   };
 
-  const cellWidth = 60.91;
-  const cellHeight = 70.2;
+  const cellWidth = 1340 / 22;
+  const cellHeight = 702 / 10;
+  const scale = 0.2;
+  const imageOffsetTop = 372;
+  const imageOffsetLeft = 556;
 
-  const renderPath = () => {
-    // console.log(path);
-    return (
-      <Svg
-        height="702"
-        width="1340"
-        style={{ position: "absolute", top: 0, left: 0 }}
-      >
-        {path.map((point, index) => {
-          if (index < path.length - 1) {
-            const nextPoint = path[index + 1];
-            return (
-              <Line
-                key={index}
-                x1={point[0] * cellWidth}
-                y1={point[1] * cellHeight}
-                x2={nextPoint[0] * cellWidth}
-                y2={nextPoint[1] * cellHeight}
-                stroke="red"
-                strokeWidth="100px"
-              />
-            );
-          }
-          return null;
-        })}
-        {/* Optionally, mark the start and end points */}
-        {/* <Circle
-          cx={path[0][0] * 100}
-          cy={path[0][1] * 100}
-          r="5"
-          fill="green"
-        />
-        <Circle
-          cx={path[path.length - 1][0] * 100}
-          cy={path[path.length - 1][1] * 100}
-          r="5"
-          fill="blue"
-        /> */}
-      </Svg>
-    );
+  const svgStyles = {
+    position: "absolute",
+    top: imageOffsetTop, // Adjust these values as necessary to align with the image's top and left edges
+    left: imageOffsetLeft,
+  };
+
+  const renderPath = (path) => {
+    return path.map((point, index) => {
+      if (index < path.length - 1) {
+        const nextPoint = path[index + 1];
+        return (
+          <Line
+            key={index}
+            x1={point[0] * cellWidth * scale}
+            y1={point[1] * cellHeight * scale}
+            x2={nextPoint[0] * cellWidth * scale}
+            y2={nextPoint[1] * cellHeight * scale}
+            stroke="red"
+            strokeWidth="4"
+          />
+        );
+      } else {
+        return null;
+      }
+    });
   };
 
   const subscribe = () => {
@@ -213,18 +200,23 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      {/* <Text>Accelerometer: (in Gs where 1 G = 9.81 m s^-2)</Text>
-      <Text>X: {data.x}</Text>
-      <Text>Y: {data.y}</Text>
-      <Text>Z: {data.z}</Text>
-      <Text>Tilt: {currentTilt}</Text>
-      <Text>Distance Traveled: {distanceTraveled}</Text>
-      <Text>Directions</Text>
-      <Text>Azimuth: {orientation.azimuth}</Text>
-      <Text>Pitch: {orientation.direction}</Text>
-      <Text>Turn Direction: {turnDirection}</Text>
-      <StatusBar style="auto" /> */}
       <Image style={styles.image} source={Map} resizeMode="center" />
+      <Svg height={702} width={1340} style={svgStyles}>
+        {renderPath(path)}
+        {/* Adding start and end circles */}
+        {/* <Circle
+          cx={path[0][0] * cellWidth}
+          cy={path[0][0] * cellHeight}
+          r="5"
+          fill="green"
+        />
+        <Circle
+          cx={path[path.length - 1][0] * cellWidth}
+          cy={path[path.length - 1][0] * cellHeight}
+          r="5"
+          fill="blue"
+        /> */}
+      </Svg>
       <Image
         style={[
           styles.dot,
@@ -236,7 +228,6 @@ export default function Home() {
         ]}
         source={DotIcon}
       />
-      {renderPath()}
     </View>
   );
 }
@@ -247,6 +238,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 1,
   },
   image: {
     height: 702,
