@@ -1,7 +1,7 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Image } from "react-native";
-import { Accelerometer, Magnetometer } from "expo-sensors";
+import { Accelerometer, Magnetometer, Gyroscope } from "expo-sensors";
 import { useEffect, useState } from "react";
 import Map from "../../assets/map.png";
 import DotIcon from "../../assets/arrow.png";
@@ -9,6 +9,7 @@ import DotIcon from "../../assets/arrow.png";
 export default function Home() {
   const THRESHOLD = 0.5;
   const FIXED_CORRECTION = 4;
+  const CORRECTION = 0.1448;
 
   const [dotPosition, setDotPosition] = useState({ top: 400, left: 250 });
   const [data, setData] = useState({});
@@ -19,6 +20,8 @@ export default function Home() {
     azimuth: 0,
     direction: "N", // Initialize with North
   });
+  const [turnDirection, setTurnDirection] = useState("");
+  const [currentX, setCurrentX] = useState("");
 
   useEffect(() => {
     subscribe();
@@ -37,7 +40,6 @@ export default function Home() {
       );
     });
 
-    let magnetometerData = { x: 0, y: 0, z: 0 };
     const magnetometerSubscription = Magnetometer.addListener((data) => {
       const azimuth = Math.atan2(data.y, data.x) * (180 / Math.PI);
 
@@ -64,26 +66,54 @@ export default function Home() {
 
       setOrientation({ azimuth, direction });
     });
+
+    const gyro = Gyroscope.addListener((data) => {
+      const gyroX = data.x.toFixed(FIXED_CORRECTION);
+
+      if (gyroX > 1) {
+        console.log("Turning Right!");
+        setTurnDirection("Turning Right");
+      } else if (gyroX < -1) {
+        console.log("Turning Left!");
+        setTurnDirection("Turning Left");
+      }
+    });
+
     return () => {
       subscription.remove();
       magnetometerSubscription.remove();
+      gyro.remove();
     };
   };
 
   const calculateDistance = async () => {
     // Store the starting point to calculate distance traveled.
-    if (!currentAcc) {
+    if (!currentAcc || !currentX) {
       setCurrentAcc(data.y);
+      setCurrentX(data.x);
     }
 
     if (Math.abs(data.y - currentAcc) >= THRESHOLD) {
       const timeDifference = 100;
+
+      const xThreshold = 1;
+      const zThreshold = 10.0;
+
+      if (
+        Math.abs(data.x - currentX) > xThreshold ||
+        Math.abs(data.z) > zThreshold
+      ) {
+        return;
+      }
+
       const acc = Math.abs(data.y - currentAcc);
-      const distance = acc * 0.2;
+      const distance = acc * CORRECTION;
 
       setDistanceTraveled(distanceTraveled + distance);
 
       setCurrentAcc(data.y);
+      setCurrentX(data.x);
+
       calculateNewPosition();
     }
   };
@@ -116,6 +146,7 @@ export default function Home() {
       <Text>Directions</Text>
       <Text>Azimuth: {orientation.azimuth}</Text>
       <Text>Pitch: {orientation.direction}</Text>
+      <Text>Turn Direction: {turnDirection}</Text>
       <StatusBar style="auto" /> */}
       <Image style={styles.image} source={Map} />
       <Image
